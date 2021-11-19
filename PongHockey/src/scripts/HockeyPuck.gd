@@ -8,6 +8,7 @@ export var speed = 500.0
 var velocity = Vector2()
 var random_number_generator = RandomNumberGenerator.new()
 var signs = [-1, 1]
+var hit_velocity = 1
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -17,12 +18,12 @@ func _ready():
 	toggle_ball_visibility()
 	spawn_ball()
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
 func _physics_process(delta):
-	var collision = move_and_collide(velocity*delta)
-	
+	var collision = move_and_collide(velocity * delta * hit_velocity)
+
 	if collision:
-		velocity = velocity.bounce(collision.normal)
+			velocity = velocity.bounce(collision.normal)
+			move_and_collide(velocity * delta * hit_velocity)
 
 	if player_scored():
 		increase_player_score()
@@ -66,6 +67,12 @@ func player_scored():
 
 func stop_ball():
 	velocity = Vector2.ZERO
+	hit_velocity = 1
 
 func toggle_ball_visibility():
 	self.get_child(0).visible = not self.get_child(0).visible
+
+
+func _on_Area2D_area_entered(area):
+	hit_velocity = area.get_velocity()
+
